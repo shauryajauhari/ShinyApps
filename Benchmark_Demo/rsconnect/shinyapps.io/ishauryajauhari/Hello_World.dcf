@@ -1,0 +1,12 @@
+name: Hello_World
+title: Hello_World
+username:
+account: ishauryajauhari
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1177410
+bundleId: 2405588
+url: https://ishauryajauhari.shinyapps.io/Hello_World/
+when: 1568187852.34817
+asMultiple: FALSE
+asStatic: FALSE
