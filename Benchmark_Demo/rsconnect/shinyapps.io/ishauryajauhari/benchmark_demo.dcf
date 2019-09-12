@@ -1,0 +1,12 @@
+name: Benchmark_Demo
+title: Benchmark_Demo
+username:
+account: ishauryajauhari
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1177781
+bundleId: 2408049
+url: https://ishauryajauhari.shinyapps.io/benchmark_demo/
+when: 1568270394.53804
+asMultiple: FALSE
+asStatic: FALSE
