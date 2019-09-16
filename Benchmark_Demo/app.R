@@ -2,7 +2,6 @@
 library(shiny)
 
 ## Main module.
-if(interactive()){
 
   ui <- fluidPage(
   titlePanel(title = "Welcome to the Benchmarking of Gene Set Analysis tools."),
@@ -489,4 +488,3 @@ server <- function(input, output, session) {
 
 # Complete app with UI and server components
 shinyApp(ui = ui, server = server)
-}
