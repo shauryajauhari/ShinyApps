@@ -1,3 +1,10 @@
+## Loading libraries.
+
+library(shiny)
+library(ggplot2)
+
+
+
 if(interactive()){
 
   ui <- fluidPage(
@@ -15,13 +22,15 @@ if(interactive()){
       helpText('These four metrics are necessary and sufficient to highlight efficacy of a tool in classification task. However, as highlighted 
                by Tarca et al. (https://doi.org/10.1371/journal.pone.0079217) we dodge the case of surrogate sensitivity, not finding it
                befitting in our scenario.'),
+      br(),
+      helpText('P.S. Results for GREAT are currently under assessment and hence unavailable.'),
       selectInput(inputId = "m", label = "Select a comparison metric for viewing plots from our benchmark dataset",
                    choices = c("Sensitivity"='sn', "Specificity"='sp',  "Prioritization"='pn', "Precision"='pr'),
                   selected = 'sn'),
       br(),
       radioButtons(inputId = "t", label = "Select a tool",
-                   choices = c("GREAT"='gt', "Chipenrich"='ce', "Broadenrich"='be',  "Seq2pathway"='sy', "Enrichr"='er'),
-                   selected = 'gt'),
+                   choices = c("Chipenrich"='ce', "Broadenrich"='be',  "Seq2pathway"='sy', "Enrichr"='er', "GREAT"='gt'),
+                   selected = 'ce'),
       br(),
       radioButtons(inputId = "d", label = "Select a disease",
                    choices = c("Colorectal Cancer"='cc', "Prostate Cancer"='pc',  "Gastric Cancer"='gc', 
@@ -34,7 +43,7 @@ if(interactive()){
                 Publication Year, GSE, GSM, TF or histone mark, Cistrome ID, KEGG ID,	Metadata.'),
       br(),
       helpText('However, the mandatory attributes include, Disease Target Pathway and GSM, as the samples will be
-               loaded and processed against the disease terms as available with the KEGG and GO ids (BP,CC,MF).'),
+               loaded and processed against the disease terms as available with the KEGG and GO ids (BP, CC, MF).'),
       fileInput(inputId = "bds", label = "Upload your benchmark dataset",
               accept = c(
                 "text/csv",
@@ -53,7 +62,7 @@ if(interactive()){
                             tags$iframe(style="height:1000px; width:100%; scrolling=yes", 
                                         src="GSA_ChIP_Seq_Master_Table.pdf")), # Summary
                    tabPanel("Preview", tableOutput(outputId = "contents")), # Show file contents.
-                   tabPanel("Benchmark Plots",
+                   tabPanel("Dataset Plots",
                             conditionalPanel(condition = "input.m=='sn'", tags$img(src="Sensitivity.jpeg", 
                                                                                    height="700", 
                                                                                    width="700",
@@ -70,7 +79,7 @@ if(interactive()){
                                                                                    height="700", 
                                                                                    width="700",
                                                                                    align="center"))),     # Display plot
-                   tabPanel("Plots", plotOutput(outputId = "userplot")) # User selected plots         
+                   tabPanel("User Plots", plotOutput(outputId = "userplot", width = "100%")) # User selected plots         
       
     )
   
@@ -92,46 +101,51 @@ server <- function(input, output, session) {
     })
   
   ## Aggregating plots from the radio button inputs from user- tool and disease.
-    for_plot <- function(tool,disease){
+    for_plot <- function(){
+      
+    ## Set working directory for the project.
+      
+    WD <- getwd()
+    if (!is.null(WD)) setwd(WD)
 
-      ## Initialize local variables for input from user
-      tool <- input$t
-      disease <- input$d
 
+    if (!is.null(input$t) && !is.null(input$t)) ## Check for valid inputs
+      {
 
       ## Import results for each metric from external, manually curated files.
 
-      precision_data <- read.table("./Benchmark_Demo/www/Precision_table.txt", sep = "\t", header = TRUE, quote = "")
-      prioritization_data <- read.table("./Benchmark_Demo/www/Prioritization_table.txt", sep = "\t", header = TRUE, quote = "")
-      sensitivity_data <- read.table("./Benchmark_Demo/www/Sensitivity_table.txt", sep = "\t", header = TRUE, quote = "")
-      specificity_data <- read.table("./Benchmark_Demo/www/Specificity_table.txt", sep = "\t", header = TRUE, quote = "")
+      precision_data <- read.table("./Benchmark_Demo/www/Precision_Table.txt", sep = "\t", header = TRUE, quote = "")
+      prioritization_data <- read.table("./Benchmark_Demo/www/Prioritization_Table.txt", sep = "\t", header = TRUE, quote = "")
+      sensitivity_data <- read.table("./Benchmark_Demo/www/Sensitivity_Table.txt", sep = "\t", header = TRUE, quote = "")
+      specificity_data <- read.table("./Benchmark_Demo/www/Specificity_Table.txt", sep = "\t", header = TRUE, quote = "")
       
       ## Creating all possible combinations for the tool and disease inputs from the user, 4 diseases * 5 tools, i.e. 20 precisely. 
       ## Colorectal Cancer and Chipenrich
-      if(input$d <- 'cc' && input$t <- 'ce')
+     
+       if(input$d == 'cc' && input$t == 'ce')
       {
-            db_sn <- sensitivity_data[,which(grepl("Colorectal", colnames(sensitivity_data[,which(grepl("Chipenrich", colnames(sensitivity_data)))])))]
-            db_sp <- specificity_data[,which(grepl("Colorectal", colnames(specificity_data[,which(grepl("Chipenrich", colnames(specificity_data)))])))]
-            db_pr <- prioritization_data[,which(grepl("Colorectal", colnames(prioritization_data[,which(grepl("Chipenrich", colnames(prioritization_data)))])))]
-            db_pn <- precision_data[,which(grepl("Colorectal", colnames(precision_data[,which(grepl("Chipenrich", colnames(precision_data)))])))]
-            db <- cbind(db_sn,db_sp,db_pr,db_pn)
-            boxplot(db,
-                  boxwex = 0.1,
-                  names = c("Sensitivity","Specificity","Prioritization","Precision"),
-                  ylab = "Colorectal Cancer",
-                  xlab = "Chipenrich",
-                  ylim = c(0,100),
-                  col = c("salmon","tan","khaki","lavender"))
-            abline(h=50, col="red")
+        db_sn <- sensitivity_data[,which(grepl("Chipenrich_Colorectal", colnames(sensitivity_data)))]
+        db_sp <- specificity_data[,which(grepl("Chipenrich_Colorectal", colnames(specificity_data)))]
+        db_pr <- prioritization_data[,which(grepl("Chipenrich_Colorectal", colnames(prioritization_data)))]
+        db_pn <- precision_data[,which(grepl("Chipenrich_Colorectal", colnames(precision_data)))]
+        db <- cbind(db_sn,db_sp,db_pr,db_pn)
+        boxplot(db,
+                boxwex = 0.1,
+                names = c("Sensitivity","Specificity","Prioritization","Precision"),
+                ylab = "Colorectal Cancer",
+                xlab = "Chipenrich",
+                ylim = c(0,100),
+                col = c("salmon","tan","khaki","lavender"))
+        abline(h=50, col="red")
       }
       
       ## Colorectal Cancer and Broadenrich
-      if(input$d <- 'cc' && input$t <- 'be')
+      if(input$d == 'cc' && input$t == 'be')
       {
-        db_sn <- sensitivity_data[,which(grepl("Colorectal", colnames(sensitivity_data[,which(grepl("Broadenrich", colnames(sensitivity_data)))])))]
-        db_sp <- specificity_data[,which(grepl("Colorectal", colnames(specificity_data[,which(grepl("Broadenrich", colnames(specificity_data)))])))]
-        db_pr <- prioritization_data[,which(grepl("Colorectal", colnames(prioritization_data[,which(grepl("Broadenrich", colnames(prioritization_data)))])))]
-        db_pn <- precision_data[,which(grepl("Colorectal", colnames(precision_data[,which(grepl("Broadenrich", colnames(precision_data)))])))]
+        db_sn <- sensitivity_data[,which(grepl("Broadenrich_Colorectal", colnames(sensitivity_data)))]
+        db_sp <- specificity_data[,which(grepl("Broadenrich_Colorectal", colnames(specificity_data)))]
+        db_pr <- prioritization_data[,which(grepl("Broadenrich_Colorectal", colnames(prioritization_data)))]
+        db_pn <- precision_data[,which(grepl("Broadenrich_Colorectal", colnames(precision_data)))]
         db <- cbind(db_sn,db_sp,db_pr,db_pn)
         boxplot(db,
                 boxwex = 0.1,
@@ -144,12 +158,12 @@ server <- function(input, output, session) {
       }
       
       ## Colorectal Cancer and Seq2pathway
-      if(input$d <- 'cc' && input$t <- 'sy')
+      if(input$d == 'cc' && input$t == 'sy')
       {
-        db_sn <- sensitivity_data[,which(grepl("Colorectal", colnames(sensitivity_data[,which(grepl("Seq2pathway", colnames(sensitivity_data)))])))]
-        db_sp <- specificity_data[,which(grepl("Colorectal", colnames(specificity_data[,which(grepl("Seq2pathway", colnames(specificity_data)))])))]
-        db_pr <- prioritization_data[,which(grepl("Colorectal", colnames(prioritization_data[,which(grepl("Seq2pathway", colnames(prioritization_data)))])))]
-        db_pn <- precision_data[,which(grepl("Colorectal", colnames(precision_data[,which(grepl("Seq2pathway", colnames(precision_data)))])))]
+        db_sn <- sensitivity_data[,which(grepl("Seq2pathway_Colorectal", colnames(sensitivity_data)))]
+        db_sp <- specificity_data[,which(grepl("Seq2pathway_Colorectal", colnames(specificity_data)))]
+        db_pr <- prioritization_data[,which(grepl("Seq2pathway_Colorectal", colnames(prioritization_data)))]
+        db_pn <- precision_data[,which(grepl("Seq2pathway_Colorectal", colnames(precision_data)))]
         db <- cbind(db_sn,db_sp,db_pr,db_pn)
         boxplot(db,
                 boxwex = 0.1,
@@ -162,12 +176,12 @@ server <- function(input, output, session) {
       }
       
       ## Colorectal Cancer and Enrichr
-      if(input$d <- 'cc' && input$t <- 'er')
+      if(input$d == 'cc' && input$t == 'er')
       {
-        db_sn <- sensitivity_data[,which(grepl("Colorectal", colnames(sensitivity_data[,which(grepl("Enrichr", colnames(sensitivity_data)))])))]
-        db_sp <- specificity_data[,which(grepl("Colorectal", colnames(specificity_data[,which(grepl("Enrichr", colnames(specificity_data)))])))]
-        db_pr <- prioritization_data[,which(grepl("Colorectal", colnames(prioritization_data[,which(grepl("Enrichr", colnames(prioritization_data)))])))]
-        db_pn <- precision_data[,which(grepl("Colorectal", colnames(precision_data[,which(grepl("Enrichr", colnames(precision_data)))])))]
+        db_sn <- sensitivity_data[,which(grepl("Enrichr_Colorectal", colnames(sensitivity_data)))]
+        db_sp <- specificity_data[,which(grepl("Enrichr_Colorectal", colnames(specificity_data)))]
+        db_pr <- prioritization_data[,which(grepl("Enrichr_Colorectal", colnames(prioritization_data)))]
+        db_pn <- precision_data[,which(grepl("Enrichr_Colorectal", colnames(precision_data)))]
         db <- cbind(db_sn,db_sp,db_pr,db_pn)
         boxplot(db,
                 boxwex = 0.1,
@@ -180,12 +194,12 @@ server <- function(input, output, session) {
       }
       
       ## Colorectal Cancer and GREAT
-      if(input$d <- 'cc' && input$t <- 'gt')
+      if(input$d == 'cc' && input$t == 'gt')
       {
-        db_sn <- sensitivity_data[,which(grepl("Colorectal", colnames(sensitivity_data[,which(grepl("GREAT", colnames(sensitivity_data)))])))]
-        db_sp <- specificity_data[,which(grepl("Colorectal", colnames(specificity_data[,which(grepl("GREAT", colnames(specificity_data)))])))]
-        db_pr <- prioritization_data[,which(grepl("Colorectal", colnames(prioritization_data[,which(grepl("GREAT", colnames(prioritization_data)))])))]
-        db_pn <- precision_data[,which(grepl("Colorectal", colnames(precision_data[,which(grepl("GREAT", colnames(precision_data)))])))]
+        db_sn <- sensitivity_data[,which(grepl("GREAT_Colorectal", colnames(sensitivity_data)))]
+        db_sp <- specificity_data[,which(grepl("GREAT_Colorectal", colnames(specificity_data)))]
+        db_pr <- prioritization_data[,which(grepl("GREAT_Colorectal", colnames(prioritization_data)))]
+        db_pn <- precision_data[,which(grepl("GREAT_Colorectal", colnames(precision_data)))]
         db <- cbind(db_sn,db_sp,db_pr,db_pn)
         boxplot(db,
                 boxwex = 0.1,
@@ -197,7 +211,287 @@ server <- function(input, output, session) {
         abline(h=50, col="red")
       }
   
-    }
+      ## Gastric Cancer and Chipenrich
+      if(input$d == 'gc' && input$t == 'ce')
+      {
+        db_sn <- sensitivity_data[,which(grepl("Chipenrich_Gastric", colnames(sensitivity_data)))]
+        db_sp <- specificity_data[,which(grepl("Chipenrich_Gastric", colnames(specificity_data)))]
+        db_pr <- prioritization_data[,which(grepl("Chipenrich_Gastric", colnames(prioritization_data)))]
+        db_pn <- precision_data[,which(grepl("Chipenrich_Gastric", colnames(precision_data)))]
+        db <- cbind(db_sn,db_sp,db_pr,db_pn)
+        boxplot(db,
+                boxwex = 0.1,
+                names = c("Sensitivity","Specificity","Prioritization","Precision"),
+                ylab = "Gastric Cancer",
+                xlab = "Chipenrich",
+                ylim = c(0,100),
+                col = c("salmon","tan","khaki","lavender"))
+        abline(h=50, col="red")
+      }
+      
+      ## Gastric Cancer and Broadenrich
+      if(input$d == 'gc' && input$t == 'be')
+      {
+        db_sn <- sensitivity_data[,which(grepl("Broadenrich_Gastric", colnames(sensitivity_data)))]
+        db_sp <- specificity_data[,which(grepl("Broadenrich_Gastric", colnames(specificity_data)))]
+        db_pr <- prioritization_data[,which(grepl("Broadenrich_Gastric", colnames(prioritization_data)))]
+        db_pn <- precision_data[,which(grepl("Broadenrich_Gastric", colnames(precision_data)))]
+        db <- cbind(db_sn,db_sp,db_pr,db_pn)
+        boxplot(db,
+                boxwex = 0.1,
+                names = c("Sensitivity","Specificity","Prioritization","Precision"),
+                ylab = "Gastric Cancer",
+                xlab = "Broadenrich",
+                ylim = c(0,100),
+                col = c("salmon","tan","khaki","lavender"))
+        abline(h=50, col="red")
+      }
+      
+      ## Gastric Cancer and Seq2pathway
+      if(input$d == 'gc' && input$t == 'sy')
+      {
+        db_sn <- sensitivity_data[,which(grepl("Seq2pathway_Gastric", colnames(sensitivity_data)))]
+        db_sp <- specificity_data[,which(grepl("Seq2pathway_Gastric", colnames(specificity_data)))]
+        db_pr <- prioritization_data[,which(grepl("Seq2pathway_Gastric", colnames(prioritization_data)))]
+        db_pn <- precision_data[,which(grepl("Seq2pathway_Gastric", colnames(precision_data)))]
+        db <- cbind(db_sn,db_sp,db_pr,db_pn)
+        boxplot(db,
+                boxwex = 0.1,
+                names = c("Sensitivity","Specificity","Prioritization","Precision"),
+                ylab = "Gastric Cancer",
+                xlab = "Seq2pathway",
+                ylim = c(0,100),
+                col = c("salmon","tan","khaki","lavender"))
+        abline(h=50, col="red")
+      }
+      
+      ## Gastric Cancer and Enrichr
+      if(input$d == 'gc' && input$t == 'er')
+      {
+        db_sn <- sensitivity_data[,which(grepl("Enrichr_Gastric", colnames(sensitivity_data)))]
+        db_sp <- specificity_data[,which(grepl("Enrichr_Gastric", colnames(specificity_data)))]
+        db_pr <- prioritization_data[,which(grepl("Enrichr_Gastric", colnames(prioritization_data)))]
+        db_pn <- precision_data[,which(grepl("Enrichr_Gastric", colnames(precision_data)))]
+        db <- cbind(db_sn,db_sp,db_pr,db_pn)
+        boxplot(db,
+                boxwex = 0.1,
+                names = c("Sensitivity","Specificity","Prioritization","Precision"),
+                ylab = "Gastric Cancer",
+                xlab = "Enrichr",
+                ylim = c(0,100),
+                col = c("salmon","tan","khaki","lavender"))
+        abline(h=50, col="red")
+      }
+      
+      ## Gastric Cancer and GREAT
+      if(input$d == 'gc' && input$t == 'gt')
+      {
+        db_sn <- sensitivity_data[,which(grepl("GREAT_Gastric", colnames(sensitivity_data)))]
+        db_sp <- specificity_data[,which(grepl("GREAT_Gastric", colnames(specificity_data)))]
+        db_pr <- prioritization_data[,which(grepl("GREAT_Gastric", colnames(prioritization_data)))]
+        db_pn <- precision_data[,which(grepl("GREAT_Gastric", colnames(precision_data)))]
+        db <- cbind(db_sn,db_sp,db_pr,db_pn)
+        boxplot(db,
+                boxwex = 0.1,
+                names = c("Sensitivity","Specificity","Prioritization","Precision"),
+                ylab = "Gastric Cancer",
+                xlab = "GREAT",
+                ylim = c(0,100),
+                col = c("salmon","tan","khaki","lavender"))
+        abline(h=50, col="red")
+      }
+      
+      ## Prostate Cancer and Chipenrich
+      if(input$d == 'pc' && input$t == 'ce')
+      {
+        db_sn <- sensitivity_data[,which(grepl("Chipenrich_Prostate", colnames(sensitivity_data)))]
+        db_sp <- specificity_data[,which(grepl("Chipenrich_Prostate", colnames(specificity_data)))]
+        db_pr <- prioritization_data[,which(grepl("Chipenrich_Prostate", colnames(prioritization_data)))]
+        db_pn <- precision_data[,which(grepl("Chipenrich_Prostate", colnames(precision_data)))]
+        db <- cbind(db_sn,db_sp,db_pr,db_pn)
+        boxplot(db,
+                boxwex = 0.1,
+                names = c("Sensitivity","Specificity","Prioritization","Precision"),
+                ylab = "Prostate Cancer",
+                xlab = "Chipenrich",
+                ylim = c(0,100),
+                col = c("salmon","tan","khaki","lavender"))
+        abline(h=50, col="red")
+      }
+      
+      ## Prostate Cancer and Broadenrich
+      if(input$d == 'pc' && input$t == 'be')
+      {
+        db_sn <- sensitivity_data[,which(grepl("Broadenrich_Prostate", colnames(sensitivity_data)))]
+        db_sp <- specificity_data[,which(grepl("Broadenrich_Prostate", colnames(specificity_data)))]
+        db_pr <- prioritization_data[,which(grepl("Broadenrich_Prostate", colnames(prioritization_data)))]
+        db_pn <- precision_data[,which(grepl("Broadenrich_Prostate", colnames(precision_data)))]
+        db <- cbind(db_sn,db_sp,db_pr,db_pn)
+        boxplot(db,
+                boxwex = 0.1,
+                names = c("Sensitivity","Specificity","Prioritization","Precision"),
+                ylab = "Prostate Cancer",
+                xlab = "Broadenrich",
+                ylim = c(0,100),
+                col = c("salmon","tan","khaki","lavender"))
+        abline(h=50, col="red")
+      }
+      
+      ## Prostate Cancer and Seq2pathway
+      if(input$d == 'pc' && input$t == 'sy')
+      {
+        db_sn <- sensitivity_data[,which(grepl("Seq2pathway_Prostate", colnames(sensitivity_data)))]
+        db_sp <- specificity_data[,which(grepl("Seq2pathway_Prostate", colnames(specificity_data)))]
+        db_pr <- prioritization_data[,which(grepl("Seq2pathway_Prostate", colnames(prioritization_data)))]
+        db_pn <- precision_data[,which(grepl("Seq2pathway_Prostate", colnames(precision_data)))]
+        db <- cbind(db_sn,db_sp,db_pr,db_pn)
+        boxplot(db,
+                boxwex = 0.1,
+                names = c("Sensitivity","Specificity","Prioritization","Precision"),
+                ylab = "Prostate Cancer",
+                xlab = "Seq2pathway",
+                ylim = c(0,100),
+                col = c("salmon","tan","khaki","lavender"))
+        abline(h=50, col="red")
+      }
+      
+      ## Prostate Cancer and Enrichr
+      if(input$d == 'pc' && input$t == 'er')
+      {
+        db_sn <- sensitivity_data[,which(grepl("Enrichr_Prostate", colnames(sensitivity_data)))]
+        db_sp <- specificity_data[,which(grepl("Enrichr_Prostate", colnames(specificity_data)))]
+        db_pr <- prioritization_data[,which(grepl("Enrichr_Prostate", colnames(prioritization_data)))]
+        db_pn <- precision_data[,which(grepl("Enrichr_Prostate", colnames(precision_data)))]
+        db <- cbind(db_sn,db_sp,db_pr,db_pn)
+        boxplot(db,
+                boxwex = 0.1,
+                names = c("Sensitivity","Specificity","Prioritization","Precision"),
+                ylab = "Prostate Cancer",
+                xlab = "Enrichr",
+                ylim = c(0,100),
+                col = c("salmon","tan","khaki","lavender"))
+        abline(h=50, col="red")
+      }
+      
+      ## Prostate Cancer and GREAT
+      if(input$d == 'pc' && input$t == 'gt')
+      {
+        db_sn <- sensitivity_data[,which(grepl("GREAT_Prostate", colnames(sensitivity_data)))]
+        db_sp <- specificity_data[,which(grepl("GREAT_Prostate", colnames(specificity_data)))]
+        db_pr <- prioritization_data[,which(grepl("GREAT_Prostate", colnames(prioritization_data)))]
+        db_pn <- precision_data[,which(grepl("GREAT_Prostate", colnames(precision_data)))]
+        db <- cbind(db_sn,db_sp,db_pr,db_pn)
+        boxplot(db,
+                boxwex = 0.1,
+                names = c("Sensitivity","Specificity","Prioritization","Precision"),
+                ylab = "Prostate Cancer",
+                xlab = "GREAT",
+                ylim = c(0,100),
+                col = c("salmon","tan","khaki","lavender"))
+        abline(h=50, col="red")
+      }
+      
+      ## Alzheimer's Disease and Chipenrich
+      if(input$d == 'ad' && input$t == 'ce')
+      {
+        db_sn <- sensitivity_data[,which(grepl("Chipenrich_Alzheimer", colnames(sensitivity_data)))]
+        db_sp <- specificity_data[,which(grepl("Chipenrich_Alzheimer", colnames(specificity_data)))]
+        db_pr <- prioritization_data[,which(grepl("Chipenrich_Alzheimer", colnames(prioritization_data)))]
+        db_pn <- precision_data[,which(grepl("Chipenrich_Alzheimer", colnames(precision_data)))]
+        db <- cbind(db_sn,db_sp,db_pr,db_pn)
+        boxplot(db,
+                boxwex = 0.1,
+                names = c("Sensitivity","Specificity","Prioritization","Precision"),
+                ylab = "Alzheimer's Disease",
+                xlab = "Chipenrich",
+                ylim = c(0,100),
+                col = c("salmon","tan","khaki","lavender"))
+        abline(h=50, col="red")
+      }
+      
+      ## Alzheimer's Disease and Broadenrich
+      if(input$d == 'ad' && input$t == 'be')
+      {
+        db_sn <- sensitivity_data[,which(grepl("Broadenrich_Alzheimer", colnames(sensitivity_data)))]
+        db_sp <- specificity_data[,which(grepl("Broadenrich_Alzheimer", colnames(specificity_data)))]
+        db_pr <- prioritization_data[,which(grepl("Broadenrich_Alzheimer", colnames(prioritization_data)))]
+        db_pn <- precision_data[,which(grepl("Broadenrich_Alzheimer", colnames(precision_data)))]
+        db <- cbind(db_sn,db_sp,db_pr,db_pn)
+        boxplot(db,
+                boxwex = 0.1,
+                names = c("Sensitivity","Specificity","Prioritization","Precision"),
+                ylab = "Alzheimer's Disease",
+                xlab = "Broadenrich",
+                ylim = c(0,100),
+                col = c("salmon","tan","khaki","lavender"))
+        abline(h=50, col="red")
+      }
+      
+      ## Alzheimer's Disease and Seq2pathway
+      if(input$d == 'ad' && input$t == 'sy')
+      {
+        db_sn <- sensitivity_data[,which(grepl("Seq2pathway_Alzheimer", colnames(sensitivity_data)))]
+        db_sp <- specificity_data[,which(grepl("Seq2pathway_Alzheimer", colnames(specificity_data)))]
+        db_pr <- prioritization_data[,which(grepl("Seq2pathway_Alzheimer", colnames(prioritization_data)))]
+        db_pn <- precision_data[,which(grepl("Seq2pathway_Alzheimer", colnames(precision_data)))]
+        db <- cbind(db_sn,db_sp,db_pr,db_pn)
+        boxplot(db,
+                boxwex = 0.1,
+                names = c("Sensitivity","Specificity","Prioritization","Precision"),
+                ylab = "Alzheimer's Disease",
+                xlab = "Seq2pathway",
+                ylim = c(0,100),
+                col = c("salmon","tan","khaki","lavender"))
+        abline(h=50, col="red")
+      }
+      
+      ## Alzheimer's Disease and Enrichr
+      if(input$d == 'ad' && input$t == 'er')
+      {
+        db_sn <- sensitivity_data[,which(grepl("Enrichr_Alzheimer", colnames(sensitivity_data)))]
+        db_sp <- specificity_data[,which(grepl("Enrichr_Alzheimer", colnames(specificity_data)))]
+        db_pr <- prioritization_data[,which(grepl("Enrichr_Alzheimer", colnames(prioritization_data)))]
+        db_pn <- precision_data[,which(grepl("Enrichr_Alzheimer", colnames(precision_data)))]
+        db <- cbind(db_sn,db_sp,db_pr,db_pn)
+        boxplot(db,
+                boxwex = 0.1,
+                names = c("Sensitivity","Specificity","Prioritization","Precision"),
+                ylab = "Alzheimer's Disease",
+                xlab = "Enrichr",
+                ylim = c(0,100),
+                col = c("salmon","tan","khaki","lavender"))
+        abline(h=50, col="red")
+      }
+      
+      ## Alzheimer's Disease and GREAT
+      if(input$d == 'ad' && input$t == 'gt')
+      {
+        db_sn <- sensitivity_data[,which(grepl("GREAT_Alzheimer", colnames(sensitivity_data)))]
+        db_sp <- specificity_data[,which(grepl("GREAT_Alzheimer", colnames(specificity_data)))]
+        db_pr <- prioritization_data[,which(grepl("GREAT_Alzheimer", colnames(prioritization_data)))]
+        db_pn <- precision_data[,which(grepl("GREAT_Alzheimer", colnames(precision_data)))]
+        db <- cbind(db_sn,db_sp,db_pr,db_pn)
+        boxplot(db,
+                boxwex = 0.1,
+                names = c("Sensitivity","Specificity","Prioritization","Precision"),
+                ylab = "Alzheimer's Disease",
+                xlab = "GREAT",
+                ylim = c(0,100),
+                col = c("salmon","tan","khaki","lavender"))
+        abline(h=50, col="red")
+      }
+      }
+  }
+    
+    
+  ## Deploying function for plotting at the click of the action button.
+    
+    output$userplot <- renderPlot(
+      {
+        # Take a dependency on 'input$submit'. This will run once initially, because the value changes from NULL to 0.
+        input$submit
+        for_plot()
+      }, height = 700, width = 700)
     
   ## Visualization plot of the data.
 #  source_url("https://github.com/mora-lab/benchmarks/blob/master/genomic_range/R/Plotting_Comparison_Metrics.R")
