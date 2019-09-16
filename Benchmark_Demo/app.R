@@ -1,10 +1,7 @@
 ## Loading libraries.
-
 library(shiny)
-library(ggplot2)
 
-
-
+## Main module.
 if(interactive()){
 
   ui <- fluidPage(
@@ -102,11 +99,6 @@ server <- function(input, output, session) {
   
   ## Aggregating plots from the radio button inputs from user- tool and disease.
     for_plot <- function(){
-      
-    ## Set working directory for the project.
-      
-    WD <- getwd()
-    if (!is.null(WD)) setwd(WD)
 
 
     if (!is.null(input$t) && !is.null(input$t)) ## Check for valid inputs
@@ -114,10 +106,10 @@ server <- function(input, output, session) {
 
       ## Import results for each metric from external, manually curated files.
 
-      precision_data <- read.table("./Benchmark_Demo/www/Precision_Table.txt", sep = "\t", header = TRUE, quote = "")
-      prioritization_data <- read.table("./Benchmark_Demo/www/Prioritization_Table.txt", sep = "\t", header = TRUE, quote = "")
-      sensitivity_data <- read.table("./Benchmark_Demo/www/Sensitivity_Table.txt", sep = "\t", header = TRUE, quote = "")
-      specificity_data <- read.table("./Benchmark_Demo/www/Specificity_Table.txt", sep = "\t", header = TRUE, quote = "")
+      precision_data <- read.table("www/Precision_Table.txt", sep = "\t", header = TRUE, quote = "")
+      prioritization_data <- read.table("www/Prioritization_Table.txt", sep = "\t", header = TRUE, quote = "")
+      sensitivity_data <- read.table("www/Sensitivity_Table.txt", sep = "\t", header = TRUE, quote = "")
+      specificity_data <- read.table("www/Specificity_Table.txt", sep = "\t", header = TRUE, quote = "")
       
       ## Creating all possible combinations for the tool and disease inputs from the user, 4 diseases * 5 tools, i.e. 20 precisely. 
       ## Colorectal Cancer and Chipenrich
@@ -493,8 +485,6 @@ server <- function(input, output, session) {
         for_plot()
       }, height = 700, width = 700)
     
-  ## Visualization plot of the data.
-#  source_url("https://github.com/mora-lab/benchmarks/blob/master/genomic_range/R/Plotting_Comparison_Metrics.R")
 }
 
 # Complete app with UI and server components
