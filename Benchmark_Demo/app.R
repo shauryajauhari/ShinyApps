@@ -60,20 +60,20 @@ library(shiny)
                    tabPanel("Preview", tableOutput(outputId = "contents")), # Show file contents.
                    tabPanel("Dataset Plots",
                             conditionalPanel(condition = "input.m=='sn'", tags$img(src="Sensitivity.jpeg", 
-                                                                                   height="700", 
-                                                                                   width="700",
+                                                                                   height="500", 
+                                                                                   width="1000",
                                                                                    align="center")),
                             conditionalPanel(condition = "input.m=='sp'", tags$img(src="Specificity.jpeg",
-                                                                                   height="700", 
-                                                                                   width="700",
+                                                                                   height="500", 
+                                                                                   width="1000",
                                                                                    align="center")),
                             conditionalPanel(condition = "input.m=='pr'", tags$img(src="Prioritization.jpeg",
-                                                                                   height="700", 
-                                                                                   width="700",
+                                                                                   height="500", 
+                                                                                   width="1000",
                                                                                    align="center")),
                             conditionalPanel(condition = "input.m=='pn'", tags$img(src="Precision.jpeg",
-                                                                                   height="700", 
-                                                                                   width="700",
+                                                                                   height="500", 
+                                                                                   width="1000",
                                                                                    align="center"))),     # Display plot
                    tabPanel("User Plots", plotOutput(outputId = "userplot", width = "100%")) # User selected plots         
       
@@ -482,7 +482,7 @@ server <- function(input, output, session) {
         # Take a dependency on 'input$submit'. This will run once initially, because the value changes from NULL to 0.
         input$submit
         for_plot()
-      }, height = 700, width = 700)
+      }, height = 500, width = 500)
     
 }
 
