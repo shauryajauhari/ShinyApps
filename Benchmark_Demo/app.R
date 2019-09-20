@@ -19,7 +19,6 @@ library(shiny)
                by Tarca et al. (https://doi.org/10.1371/journal.pone.0079217) we dodge the case of surrogate sensitivity, not finding it
                befitting in our scenario.'),
       br(),
-      helpText('P.S. Results for GREAT are currently under assessment and hence unavailable.'),
       selectInput(inputId = "m", label = "Select a comparison metric for viewing plots from our benchmark dataset",
                    choices = c("Sensitivity"='sn', "Specificity"='sp',  "Prioritization"='pn', "Precision"='pr'),
                   selected = 'sn'),
