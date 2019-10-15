@@ -58,19 +58,19 @@ ui <- fluidPage(
                                         src="GSA_ChIP_Seq_Master_Table.pdf")), # Summary
                    tabPanel("Preview", tableOutput(outputId = "contents")), # Show file contents.
                    tabPanel("Dataset Plots",
-                            conditionalPanel(condition = "input.m=='sn'", tags$img(src="Sensitivity.jpeg", 
+                            conditionalPanel(condition = "input.m=='sn'", tags$img(src="Sensitivity_ggplot.jpeg", 
                                                                                    height="500", 
                                                                                    width="1000",
                                                                                    align="center")),
-                            conditionalPanel(condition = "input.m=='sp'", tags$img(src="Specificity.jpeg",
+                            conditionalPanel(condition = "input.m=='sp'", tags$img(src="Specificity_ggplot.jpeg",
                                                                                    height="500", 
                                                                                    width="1000",
                                                                                    align="center")),
-                            conditionalPanel(condition = "input.m=='pr'", tags$img(src="Prioritization.jpeg",
+                            conditionalPanel(condition = "input.m=='pr'", tags$img(src="Prioritization_ggplot.jpeg",
                                                                                    height="500", 
                                                                                    width="1000",
                                                                                    align="center")),
-                            conditionalPanel(condition = "input.m=='pn'", tags$img(src="Precision.jpeg",
+                            conditionalPanel(condition = "input.m=='pn'", tags$img(src="Precision_ggplot.jpeg",
                                                                                    height="500", 
                                                                                    width="1000",
                                                                                    align="center"))),     # Display plot
