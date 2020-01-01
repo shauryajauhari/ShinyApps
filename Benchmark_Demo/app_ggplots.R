@@ -79,10 +79,10 @@ library(ggplot2)
                    tabPanel("User Plots", plotOutput(outputId = "userplot", width = "100%")), # User selected plots,
                    tabPanel("ROC Plot",
                             tags$img(src="ROC_Plot.jpeg",
-                                     height="500", 
+                                     height="500",
                                      width="1000",
                                      align="center")) # ROC Plot
-      
+
     )
   
   )))
@@ -468,9 +468,9 @@ server <- function(input, output, session) {
     output$userplot <- renderPlot(
       {
         # Take a dependency on 'input$submit'. This will run once initially, because the value changes from NULL to 0.
-        input$submit
-        for_plot()
-      }, height = 1000, width = 1000)
+       input$submit
+       for_plot()
+      }, height = 500, width = 1000)
     
 }
 
