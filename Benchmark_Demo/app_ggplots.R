@@ -76,7 +76,12 @@ library(ggplot2)
                                                                                    height="500", 
                                                                                    width="1000",
                                                                                    align="center"))),     # Display plot
-                   tabPanel("User Plots", plotOutput(outputId = "userplot", width = "100%")) # User selected plots         
+                   tabPanel("User Plots", plotOutput(outputId = "userplot", width = "100%")), # User selected plots,
+                   tabPanel("ROC Plot",
+                            tags$img(src="ROC_Plot.jpeg",
+                                     height="500", 
+                                     width="1000",
+                                     align="center")) # ROC Plot
       
     )
   
